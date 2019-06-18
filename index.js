@@ -10,8 +10,19 @@ io.on('connection', socket => {
   socket.broadcast.emit('chat connect', socket.handshake.address);
   console.log(`${socket.handshake.address} connected`);
 
+  socket.on('set nickname', nickname => {
+    socket.nickname = nickname;
+    const users = [];
+    users.push(nickname);
+    console.log(users);
+  });
+
   socket.on('chat message', msg => {
-    const user = socket.handshake.address;
+    // const user = socket.handshake.address;
+    const user =
+      socket.nickname === 'undefined'
+        ? socket.handshake.address
+        : socket.nickname;
     const timestamp = new Date();
     const timeHours =
       timestamp.getHours() < 10

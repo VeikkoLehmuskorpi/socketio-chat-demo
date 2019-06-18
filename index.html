@@ -7,12 +7,20 @@
     <title>Socket.IO Chat Example</title>
   </head>
   <body>
+    <div id="nicknameDiv">
+      <h2>Nickname</h2>
+      <form action="" id="nicknameForm">
+        <input type="text" required id="nicknameInput" />
+        <button>set</button>
+      </form>
+    </div>
+
     <h2>Online</h2>
     <ul id="onlineUsers"></ul>
 
     <h2>Chat</h2>
     <ul id="messages"></ul>
-    <form id="messageForm" action="">
+    <form action="" id="messageForm">
       <input type="text" id="messageInput" />
       <button>send</button>
     </form>
@@ -20,7 +28,22 @@
     <script src="/socket.io/socket.io.js"></script>
     <script>
       const socket = io();
+
+      const nicknameDiv = document.querySelector('#nicknameDiv');
+      const nicknameForm = document.querySelector('#nicknameForm');
+      const nicknameInput = document.querySelector('#nicknameInput');
+      let nickname = 'You';
+
+      nicknameForm.addEventListener('submit', e => {
+        e.preventDefault();
+        nickname = nicknameInput.value;
+        socket.emit('set nickname', nicknameInput.value);
+        nicknameDiv.style.display = 'none';
+        return false;
+      });
+
       const onlineUsers = document.querySelector('#onlineUsers');
+
       const messages = document.querySelector('#messages');
       const messageForm = document.querySelector('#messageForm');
       const messageInput = document.querySelector('#messageInput');
@@ -30,7 +53,7 @@
         socket.emit('chat message', messageInput.value);
         /* Show your own message */
         displayMessage(
-          `You (${getCurrentTime()}): ${messageInput.value}`,
+          `${nickname} (${getCurrentTime()}): ${messageInput.value}`,
           messages
         );
         resetInputValue(messageInput);
