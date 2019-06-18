@@ -23,17 +23,21 @@
       form.addEventListener('submit', e => {
         e.preventDefault();
         socket.emit('chat message', input.value);
+        displayMessage(input.value);
         input.value = '';
         return false;
       });
 
       socket.on('chat message', msg => {
+        displayMessage(msg);
+      });
+
+      const displayMessage = msg => {
         const msgElem = document.createElement('li');
         const msgTextNode = document.createTextNode(msg);
         msgElem.appendChild(msgTextNode);
-
         messages.appendChild(msgElem);
-      });
+      };
     </script>
   </body>
 </html>
