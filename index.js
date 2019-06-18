@@ -7,15 +7,17 @@ app.get('/', (req, res) => {
 });
 
 io.on('connection', socket => {
-  console.log('a user connected');
+  socket.broadcast.emit('chat connect', socket.handshake.address);
+  console.log(`${socket.handshake.address} connected`);
 
   socket.on('chat message', msg => {
-    socket.broadcast.emit('chat message', msg);
-    console.log(`message: ${msg}`);
+    socket.broadcast.emit('chat message', msg, socket.handshake.address);
+    console.log(`${socket.handshake.address} says: ${msg}`);
   });
 
   socket.on('disconnect', () => {
-    console.log('user disconnected');
+    socket.broadcast.emit('chat disconnect', socket.handshake.address);
+    console.log(`${socket.handshake.address} disconnected`);
   });
 });
 
