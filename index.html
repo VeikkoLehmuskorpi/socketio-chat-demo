@@ -8,14 +8,23 @@
   </head>
   <body>
     <ul id="messages"></ul>
-    <form action="">
+    <form id="messageForm" action="">
       <input type="text" id="messageInput" />
       <button>send</button>
     </form>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
-      let socket = io();
+      const socket = io();
+      const form = document.querySelector('#messageForm');
+      const input = document.querySelector('#messageInput');
+
+      form.addEventListener('submit', e => {
+        e.preventDefault();
+        socket.emit('chat message', input.value);
+        input.value = '';
+        return false;
+      });
     </script>
   </body>
 </html>
