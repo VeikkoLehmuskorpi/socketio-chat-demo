@@ -27,81 +27,63 @@
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
+      /* Initialize socket */
       const socket = io();
 
+      /* UI: Nickname */
       const nicknameDiv = document.querySelector('#nicknameDiv');
       const nicknameForm = document.querySelector('#nicknameForm');
       const nicknameInput = document.querySelector('#nicknameInput');
       let nickname = 'You';
 
+      /* Handle setting a nickname */
       nicknameForm.addEventListener('submit', e => {
         e.preventDefault();
         nickname = nicknameInput.value;
-        socket.emit('set nickname', nicknameInput.value);
+        socket.emit('set nickname', nickname);
+        /* Hide the nickname form */
         nicknameDiv.style.display = 'none';
         return false;
       });
 
+      /* UI: Online users */
       const onlineUsers = document.querySelector('#onlineUsers');
 
+      /* UI: Messages */
       const messages = document.querySelector('#messages');
       const messageForm = document.querySelector('#messageForm');
       const messageInput = document.querySelector('#messageInput');
 
+      /* Handle sending a chat message */
       messageForm.addEventListener('submit', e => {
         e.preventDefault();
         socket.emit('chat message', messageInput.value);
-        /* Show your own message */
-        displayMessage(
-          `${nickname} (${getCurrentTime()}): ${messageInput.value}`,
-          messages
-        );
-        resetInputValue(messageInput);
+        messageInput.value = '';
         return false;
       });
 
+      /* Display users connecting */
+      socket.on('chat connect', (user, time) => {
+        displayMessage(`${time} ${user} connected`);
+      });
+
+      /* Display users disconnecting */
+      socket.on('chat disconnect', (user, time) => {
+        displayMessage(`${time} ${user} disconnected`);
+      });
+
+      /* Display user messages */
       socket.on('chat message', (msg, user, time) => {
-        displayMessage(`${user} (${time}): ${msg}`, messages);
+        displayMessage(`${time} ${user}: ${msg}`, messages);
       });
 
-      socket.on('chat connect', (user, clients) => {
-        displayMessage(`${user} connected`, messages);
-      });
-
-      socket.on('chat disconnect', (user, clients) => {
-        displayMessage(`${user} disconnected`, messages);
-      });
-
-      const displayMessage = (message, parent) => {
+      /* Append messages to the chat window */
+      const displayMessage = message => {
         const msgElem = document.createElement('li');
         const msgTextNode = document.createTextNode(message);
         msgElem.appendChild(msgTextNode);
-        parent.appendChild(msgElem);
+        messages.appendChild(msgElem);
       };
-
-      const displayClients = clients => {
-        clients.map(client => displayMessage(client, onlineUsers));
-      };
-
-      const getCurrentTime = () => {
-        const timestamp = new Date();
-        const timeHours =
-          timestamp.getHours() < 10
-            ? `0${timestamp.getHours()}`
-            : timestamp.getHours();
-        const timeMinutes =
-          timestamp.getMinutes() < 10
-            ? `0${timestamp.getMinutes()}`
-            : timestamp.getMinutes();
-        const timeSeconds =
-          timestamp.getSeconds() < 10
-            ? `0${timestamp.getSeconds()}`
-            : timestamp.getSeconds();
-        const formattedTimestamp = `${timeHours}:${timeMinutes}:${timeSeconds}`;
-        return formattedTimestamp;
-      };
-
-      const resetInputValue = field => (field.value = '');
     </script>
   </body>
 </html>
