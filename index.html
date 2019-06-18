@@ -7,6 +7,10 @@
     <title>Socket.IO Chat Example</title>
   </head>
   <body>
+    <h2>Online</h2>
+    <ul id="onlineUsers"></ul>
+
+    <h2>Chat</h2>
     <ul id="messages"></ul>
     <form id="messageForm" action="">
       <input type="text" id="messageInput" />
@@ -16,37 +20,65 @@
     <script src="/socket.io/socket.io.js"></script>
     <script>
       const socket = io();
+      const onlineUsers = document.querySelector('#onlineUsers');
       const messages = document.querySelector('#messages');
-      const form = document.querySelector('#messageForm');
-      const input = document.querySelector('#messageInput');
+      const messageForm = document.querySelector('#messageForm');
+      const messageInput = document.querySelector('#messageInput');
 
-      form.addEventListener('submit', e => {
+      messageForm.addEventListener('submit', e => {
         e.preventDefault();
-        socket.emit('chat message', input.value);
+        socket.emit('chat message', messageInput.value);
         /* Show your own message */
-        displayMessage(`You: ${input.value}`);
-        input.value = '';
+        displayMessage(
+          `You (${getCurrentTime()}): ${messageInput.value}`,
+          messages
+        );
+        resetInputValue(messageInput);
         return false;
       });
 
-      socket.on('chat message', (msg, user) => {
-        displayMessage(`${user}: ${msg}`);
+      socket.on('chat message', (msg, user, time) => {
+        displayMessage(`${user} (${time}): ${msg}`, messages);
       });
 
-      socket.on('chat connect', user => {
-        displayMessage(`${user} connected`);
+      socket.on('chat connect', (user, clients) => {
+        displayMessage(`${user} connected`, messages);
       });
 
-      socket.on('chat disconnect', user => {
-        displayMessage(`${user} disconnected`);
+      socket.on('chat disconnect', (user, clients) => {
+        displayMessage(`${user} disconnected`, messages);
       });
 
-      const displayMessage = msg => {
+      const displayMessage = (message, parent) => {
         const msgElem = document.createElement('li');
-        const msgTextNode = document.createTextNode(msg);
+        const msgTextNode = document.createTextNode(message);
         msgElem.appendChild(msgTextNode);
-        messages.appendChild(msgElem);
+        parent.appendChild(msgElem);
       };
+
+      const displayClients = clients => {
+        clients.map(client => displayMessage(client, onlineUsers));
+      };
+
+      const getCurrentTime = () => {
+        const timestamp = new Date();
+        const timeHours =
+          timestamp.getHours() < 10
+            ? `0${timestamp.getHours()}`
+            : timestamp.getHours();
+        const timeMinutes =
+          timestamp.getMinutes() < 10
+            ? `0${timestamp.getMinutes()}`
+            : timestamp.getMinutes();
+        const timeSeconds =
+          timestamp.getSeconds() < 10
+            ? `0${timestamp.getSeconds()}`
+            : timestamp.getSeconds();
+        const formattedTimestamp = `${timeHours}:${timeMinutes}:${timeSeconds}`;
+        return formattedTimestamp;
+      };
+
+      const resetInputValue = field => (field.value = '');
     </script>
   </body>
 </html>

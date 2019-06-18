@@ -11,8 +11,23 @@ io.on('connection', socket => {
   console.log(`${socket.handshake.address} connected`);
 
   socket.on('chat message', msg => {
-    socket.broadcast.emit('chat message', msg, socket.handshake.address);
-    console.log(`${socket.handshake.address} says: ${msg}`);
+    const user = socket.handshake.address;
+    const timestamp = new Date();
+    const timeHours =
+      timestamp.getHours() < 10
+        ? `0${timestamp.getHours()}`
+        : timestamp.getHours();
+    const timeMinutes =
+      timestamp.getMinutes() < 10
+        ? `0${timestamp.getMinutes()}`
+        : timestamp.getMinutes();
+    const timeSeconds =
+      timestamp.getSeconds() < 10
+        ? `0${timestamp.getSeconds()}`
+        : timestamp.getSeconds();
+    const formattedTimestamp = `${timeHours}:${timeMinutes}:${timeSeconds}`;
+    socket.broadcast.emit('chat message', msg, user, formattedTimestamp);
+    console.log(`${user} (${formattedTimestamp}) says: ${msg}`);
   });
 
   socket.on('disconnect', () => {
