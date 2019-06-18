@@ -16,6 +16,7 @@
     <script src="/socket.io/socket.io.js"></script>
     <script>
       const socket = io();
+      const messages = document.querySelector('#messages');
       const form = document.querySelector('#messageForm');
       const input = document.querySelector('#messageInput');
 
@@ -24,6 +25,14 @@
         socket.emit('chat message', input.value);
         input.value = '';
         return false;
+      });
+
+      socket.on('chat message', msg => {
+        const msgElem = document.createElement('li');
+        const msgTextNode = document.createTextNode(msg);
+        msgElem.appendChild(msgTextNode);
+
+        messages.appendChild(msgElem);
       });
     </script>
   </body>
