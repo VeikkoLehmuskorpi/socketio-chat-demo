@@ -42,7 +42,8 @@
         nickname = nicknameInput.value;
         socket.emit('set nickname', nickname);
         /* Hide the nickname form */
-        nicknameDiv.style.display = 'none';
+        /* nicknameDiv.style.display = 'none'; */
+        nicknameInput.value = '';
         return false;
       });
 
@@ -77,12 +78,34 @@
         displayMessage(`${time} ${user}: ${msg}`, messages);
       });
 
+      /* Display online users */
+      socket.on('userlist change', connectedUsers => {
+        /* first remove all users from the list */
+        while (onlineUsers.firstChild) {
+          onlineUsers.removeChild(onlineUsers.firstChild);
+        }
+
+        /* display each user */
+        connectedUsers.map(user =>
+          displayUsers(user.nickname[user.nickname.length - 1], user.id)
+        );
+      });
+
       /* Append messages to the chat window */
       const displayMessage = message => {
         const msgElem = document.createElement('li');
         const msgTextNode = document.createTextNode(message);
         msgElem.appendChild(msgTextNode);
         messages.appendChild(msgElem);
+      };
+
+      /* Append nicknames to the list of online users */
+      const displayUsers = (nickname, socketId) => {
+        const userElem = document.createElement('li');
+        userElem.id = socketId;
+        const userTextNode = document.createTextNode(nickname);
+        userElem.appendChild(userTextNode);
+        onlineUsers.appendChild(userElem);
       };
     </script>
   </body>
